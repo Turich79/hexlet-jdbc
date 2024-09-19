@@ -2,6 +2,7 @@ package io.hexlet;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class Main {
     public static void main(String[] args) throws SQLException {
@@ -17,7 +18,7 @@ public class Main {
 //        statement.execute(sql);
 //        statement.close(); // В конце закрываем
         ////Вариант 2
-        try (var statement = conn.createStatement()){
+        try (var statement = conn.createStatement()) {
             statement.execute(sql);
         }
 
@@ -25,7 +26,7 @@ public class Main {
 //        var statement2 = conn.createStatement();
 //        statement2.executeUpdate(sql2);
 //        statement2.close();
-        try (var statement2=conn.createStatement()) {
+        try (var statement2 = conn.createStatement()) {
             statement2.executeUpdate(sql2);
         }
 
@@ -40,7 +41,7 @@ public class Main {
 //            System.out.println(resultSet.getString("phone"));
 //        }
 //        statement3.close();
-        try (var statement3=conn.createStatement()) {
+        try (var statement3 = conn.createStatement()) {
             var resultSet = statement3.executeQuery(sql3);
             while (resultSet.next()) {
                 System.out.println(resultSet.getString("username"));
@@ -48,6 +49,44 @@ public class Main {
             }
         }
 
+        System.out.println("Vstavka 2 users");
+        var sql4 = "INSERT INTO users (username,phone) VALUES(?,?)";
+        try (var preperedStatement = conn.prepareStatement(sql4, Statement.RETURN_GENERATED_KEYS)) {
+            preperedStatement.setString(1,"Pasha");
+            preperedStatement.setString(2,"888999888");
+            preperedStatement.executeUpdate();
+
+            preperedStatement.setString(1,"Misha");
+            preperedStatement.setString(2,"877999778");
+            preperedStatement.executeUpdate();
+        }
+
+        System.out.println("vyvod users");
+        sql3 = "SELECT * FROM users";
+        try (var statement3 = conn.createStatement()) {
+            var resultSet = statement3.executeQuery(sql3);
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString("username"));
+                System.out.println(resultSet.getString("phone"));
+            }
+        }
+
+        System.out.println("delete 1 users");
+        sql4 = "DELETE FROM users WHERE username = ?;";
+        try (var preperedStatement = conn.prepareStatement(sql4, Statement.RETURN_GENERATED_KEYS)) {
+            preperedStatement.setString(1,"Pasha");
+            preperedStatement.executeUpdate();
+        }
+
+        System.out.println("vyvod users");
+        sql3 = "SELECT * FROM users";
+        try (var statement3 = conn.createStatement()) {
+            var resultSet = statement3.executeQuery(sql3);
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString("username"));
+                System.out.println(resultSet.getString("phone"));
+            }
+        }
         // Закрываем соединение
         conn.close();
     }
